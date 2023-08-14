@@ -1,0 +1,87 @@
+name: terraform plan
+author: Jirawat Uttayaya (juttayaya)
+description: Terraform Validate and Plan
+
+inputs:
+  envname:
+    description: The Cloud Environment to run
+    required: true
+  github-token:
+    description: GitHub Token
+    required: true
+  terraform-directory:
+    description: Directory where Terraform config is located
+    required: false
+    default: '.'
+  terraform-plan-output:
+    description: Terraform plan output file
+    required: false
+    default: 'github-actions.tfplan'
+
+runs:
+  using: composite
+  steps:
+    - name: Terraform validate
+      working-directory: ${{ inputs.terraform-directory }}
+      run: terraform validate
+      shell: bash
+    - name: Terraform plan
+      id: tfplan
+      working-directory: ${{ inputs.terraform-directory }}
+      run: |
+        terraform plan -no-color -out=${{ inputs.terraform-plan-output }} > /dev/null
+        terraform show -no-color ${{ inputs.terraform-plan-output }}
+      shell: bash
+    - name: Display Terraform plan on summary
+      working-directory: ${{ inputs.terraform-directory }}
+      run: |
+        echo "### Terraform Plan on ${{ inputs.envname }} from $GITHUB_REF_NAME :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo '~~~' >> $GITHUB_STEP_SUMMARY
+        echo "${{ steps.tfplan.outputs.stdout }}" >> $GITHUB_STEP_SUMMARY
+        echo '~~~' >> $GITHUB_STEP_SUMMARY
+      shell: bash
+    - name: Terraform PR
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          // 1. Retrieve existing bot comments for the PR
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          })
+          const botComment = comments.find(comment => {
+            return comment.user.type === 'Bot' && comment.body.includes('Terraform Plan')
+          })
+
+          // 2. Prepare format of the comment
+          const output = `#### Terraform Plan 📖\`${{ steps.tfplan.outcome }}\`
+
+          <details><summary>Show Plan</summary>
+
+          \`\`\`\n
+          ${{ steps.tfplan.outputs.stdout }}
+          \`\`\`
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+          // 3. If we have a comment, update it, otherwise create a new one
+          if (botComment) {
+            github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: output
+            });
+          } else {
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+          }

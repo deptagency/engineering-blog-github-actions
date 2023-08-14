@@ -1,0 +1,48 @@
+# https://docs.github.com/en/actions/using-workflows/reusing-workflows
+# Reusable GitHub Workflow restrictions
+# * YAML files must live in public repo or in local root directory ./.github/workflows
+# * Cannot use other reusable GitHub Workflow YAMLs
+# * environment variables are not automatically included
+# * callers cannot use workflow `strategy`
+name: Example - Reusable Workflow
+
+on:
+  # workflow_call is for reusable workflows called by other workflows
+  workflow_call:
+    inputs:
+      varname01:
+        description: Example of workflow input parameter named varname01
+        required: true
+        # type can be string, number, or boolean
+        type: string
+      varname02:
+        description: Example of workflow input parameter named varname02
+        required: false
+        type: number
+        default: 0
+    secrets:
+      secretvar01:
+        description: Example of workflow secret parameter secretvar01
+        required: false
+    outputs:
+      outputvar01:
+        description: Example of workflow output return named outputvar01
+        value: ${{ jobs.reusable-workflow-job.outputs.reusable-workflow-job-output }}
+
+
+jobs:
+  reusable-workflow-job:
+    name: Reusable Workflow Job Name
+    runs-on: ubuntu-latest
+    outputs:
+      reusable-workflow-job-output: ${{ steps.reusable-workflow-job-retval-id.outputs.retval }}
+    steps:
+      - name: Execute Reusable Step One
+        run: echo "Reusable Step One with inputs '${{ inputs.varname01 }}' and '${{ inputs.varname02 }}'"
+      - name: Execute Reusable Step Two
+        run: |
+          echo "Reusable Step Two with secret '${{ secrets.secretvar01 }}'"
+          echo "Reusable Workflow always has access to '${{ github.token }}' and '${{ secrets.GITHUB_TOKEN }}'"
+      - name: Generate Output
+        id: reusable-workflow-job-retval-id
+        run: echo "::set-output name=retval::WF Return Value ${{ inputs.varname01 }}-${{ inputs.varname02 }}"

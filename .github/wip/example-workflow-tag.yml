@@ -1,0 +1,24 @@
+name: GitHub Workflow Example - Tag
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  github-example-tags:
+    name: GitHub Job Example - Tags
+    runs-on: ubuntu-latest
+    steps:
+      # https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+      # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+      - name: GitHub Steps Example - Tags
+        run: |
+          echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
+          echo "Tag name from github.ref_name: ${{  github.ref_name }}"
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+      - name: Set Short Git Commit SHA
+        id: gitvar
+        # https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/:
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Get Short Git Commit SHA
+        run: echo ${{ steps.gitvar.outputs.sha_short }}

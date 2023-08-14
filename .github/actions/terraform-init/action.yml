@@ -1,0 +1,78 @@
+name: terraform init
+author: Jirawat Uttayaya (juttayaya)
+description: Initialize and Authorize Terraform
+
+inputs:
+  aws-access-key-id:
+    description: >-
+      AWS Access Key ID. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-secret-access-key:
+    description: >-
+      AWS Secret Access Key. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-region:
+    description: 'AWS Region, e.g. us-east-2'
+    required: true
+  terraform-version:
+    description: Terraform version to use
+    required: false
+    default: 1.2.3
+  terraform-directory:
+    description: Directory where Terraform config is located
+    required: false
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+    - name: Display AWS auth ID
+      run: aws sts get-caller-identity
+      shell: bash
+    - name: Setup Terraform
+      # Installs a specific version of Terraform
+      # https://github.com/marketplace/actions/hashicorp-setup-terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ inputs.terraform-version }}
+    - name: Configure Terraform plugin cache
+      # Using bash $HOME var because ~ is inconsistent in GitHub Actions and Terraform
+      # For more info on .terraformrc and plugin_cache_dir
+      # https://www.terraform.io/cli/config/config-file
+      run: |
+        echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' > $HOME/.terraformrc
+        mkdir -p $HOME/.terraform.d/plugin-cache
+      shell: bash
+    - name: Use Terraform plugin cache
+      uses: actions/cache@v3
+      with:
+        # Using ~ in GitHub Actions path because there is no $HOME env var equivalent
+        path: ~/.terraform.d/plugin-cache
+        key: ${{ runner.os }}-tf-plugin-cache-${{ hashFiles(format('{0}/**/.terraform.lock.hcl', inputs.terraform-directory)) }}
+        restore-keys: ${{ runner.os }}-tf-plugin-cache-
+    - name: Terraform provider cache work-around
+      working-directory: ${{ inputs.terraform-directory }}
+      # Since -get-plugins=false is no longer supported as of Terraform 0.13.0
+      # this step allows the provider plugins step to fail file cache so we can
+      # update the providers lock explicitly in the next step
+      run: |
+        terraform init -backend-config=./environments/${{ inputs.envname }}/s3.tfbackend
+      shell: bash
+      continue-on-error: true
+    - name: Terraform init
+      working-directory: ${{ inputs.terraform-directory }}
+      # The usual scenario is to create .terraform.lock.hcl on a Mac and run on Linux
+      # If using file-based provider caching, Terraform may not have the opportunity
+      # to update .terraform.lock.hcl with the Linux checksum
+      # terraform providers lock command does that explicitly
+      # https://www.terraform.io/language/files/dependency-lock#new-provider-package-checksums
+      run: |
+        terraform init
+        terraform providers lock -platform=linux_amd64
+      shell: bash

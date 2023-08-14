@@ -1,0 +1,72 @@
+name: Terraform - Apply
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+    inputs:
+      envname:
+        description: The Cloud Environment to run
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+permissions:
+  id-token: write
+  contents: read    # This is required for actions/checkout
+defaults:
+  run:
+    shell: bash
+env:
+  terraform-version: 1.2.3
+  terraform-directory: "terraform"
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+      - name: Cloud Environment setup
+        # Avoiding the use of GitHub Environment since it is a paid feature of GitHub Enterprise for private repos
+        # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
+        run: |
+          echo "Running Terraform Plan on ${{ inputs.envname }}"
+          if [[ "${{ inputs.envname }}" == "dev" ]] || [[ "${{ inputs.envname }}" == "" ]] ; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_DEV }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+          elif [[ "${{ inputs.envname }}" == "stage" ]]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_STAGE }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_STAGE }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-east-2" >> $GITHUB_ENV
+          elif [[ "${{ inputs.envname }}" == "prod" ]]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_PROD }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}" >> $GITHUB_ENV
+            echo "AWS_REGION=us-west-1" >> $GITHUB_ENV
+          else
+            # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
+            echo "::error title=Unsupported envname::The envname ${{ inputs.envname }} is unsupported"
+            exit 1
+          fi
+      - name: Initialize Terraform
+        uses: ./.github/actions/terraform-init
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          terraform-version: ${{ env.terraform-version }}
+          terraform-directory: ${{ env.terraform-directory }}
+      - name: Terraform plan
+        uses: ./.github/actions/terraform-plan
+        with:
+          envname: ${{ inputs.envname }}
+          terraform-directory: ${{ env.terraform-directory }}
+      - name: Terraform apply
+        working-directory: ${{ env.terraform-directory }}
+        run: terraform apply -no-color -auto-approve github-actions.tfplan
+

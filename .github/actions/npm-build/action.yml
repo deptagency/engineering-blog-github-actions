@@ -1,0 +1,36 @@
+name: npm build
+description: npm build
+
+inputs:
+  node-version:
+    description: Node version for compilation
+    required: true
+  node-directory:
+    description: Directory where Node code is located
+    required: false
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: npm setup
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+    - name: npm lint
+      working-directory: ${{ inputs.node-directory }}
+      run: npm run lint
+      shell: bash
+    - name: npm ci
+      working-directory: ${{ inputs.node-directory }}
+      run: npm ci
+      shell: bash
+    - name: npm build
+      working-directory: ${{ inputs.node-directory }}
+      run: npm run build
+      shell: bash
+    - name: npm test
+      working-directory: ${{ inputs.node-directory }}
+      run: npm run test
+      shell: bash

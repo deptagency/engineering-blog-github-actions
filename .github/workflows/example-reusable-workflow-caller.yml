@@ -1,0 +1,31 @@
+name: Example - Reusable Workflow Caller
+
+on:
+  # workflow_dispatch is a manually invoked workflow
+  workflow_dispatch:
+
+jobs:
+  reusable-workflow-caller-1A:
+    name: 01A Calling Reusable Workflow
+    # Use the `uses` keyword to invoke Reusable GitHub Workflows
+    uses: ./.github/workflows/example-reusable-workflow.yml
+    with:
+      varname01: 01A
+  reusable-workflow-caller-2A:
+    name: 02A Calling Reusable Workflow
+    needs:
+      - reusable-workflow-caller-1A
+    uses: ./.github/workflows/example-reusable-workflow.yml
+    with:
+      # Example of using output of parent reusable workflow
+      varname01: ${{ needs.reusable-workflow-caller-1A.outputs.outputvar01 }}
+      varname02: 2
+  reusable-workflow-caller-1B:
+    name: 01B Calling Reusable Workflow
+    # An example of calling reusable actions in other public repositories
+    uses: juttayaya/cookbook-github-actions/.github/workflows/example-reusable-workflow.yml@main
+    with:
+      varname01: Caller Input String 01B
+      varname02: 1
+    # Callers can pass all secrets to reusable workflows via inherit
+    secrets: inherit

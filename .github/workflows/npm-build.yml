@@ -1,0 +1,28 @@
+name: npm - build
+on:
+  push:
+    branches-ignore:
+      - 'main'
+    paths:
+      - 'node/**'
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read    # This is required for actions/checkout
+defaults:
+  run:
+    shell: bash
+env:
+  node-version: 17
+  node-directory: 'node'
+jobs:
+  npm-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+      - name: npm build
+        uses: ./.github/actions/npm-build
+        with:
+          node-version: ${{ env.node-version }}
+          node-directory: ${{ env.node-directory }}
