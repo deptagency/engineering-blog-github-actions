@@ -55,15 +55,8 @@ jobs:
       -
         name: Build and Tag Docker image
         uses: docker/build-push-action@v4.1.1
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: audi-vw-survey-iframe-ecr
-          IMAGE_TAG: ${{ github.sha }}
-          DIRECTUS_URI: ${{ vars.DIRECTUS_URI }}
-          NEXT_PUBLIC_DIRECTUS_URI: ${{ vars.NEXT_PUBLIC_DIRECTUS_URI }}
-          DIRECTUS_STATIC_TOKEN: ${{ secrets.DIRECTUS_STATIC_TOKEN }}
         with:
-          file: ./docker/Dockerfile
+          file: nextjs-blog/docker/Dockerfile
           context: nextjs-blog
           tags: ${{ steps.dockermeta.outputs.tags }}
           labels: ${{ steps.dockermeta.outputs.labels }}
