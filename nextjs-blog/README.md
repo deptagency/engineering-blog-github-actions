@@ -61,3 +61,11 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 # Notes
 
 `blog-starter` uses [Tailwind CSS](https://tailwindcss.com) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3).
+
+# Docker-ize
+1. Add docker/Dockerfile
+2. Add .dockerignore
+3. Add next.config.js
+4. npm i sharp
+5. docker buildx build -f nextjs-blog/docker/Dockerfile -t nextjs-blog:latest nextjs-blog 
+6. docker run -p 3000:3000 nextjs-blog:latest
