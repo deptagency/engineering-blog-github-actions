@@ -5,6 +5,8 @@ on:
     branches:
       ## GitHub Actions need '**' to match branches with '/' in their name
       - '**'
+    paths:
+      - "nextjs-blog/**"
     tags:
       - '*'
   pull_request:
