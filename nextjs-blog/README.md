@@ -69,3 +69,8 @@ Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&ut
 4. npm i sharp
 5. docker buildx build -f nextjs-blog/docker/Dockerfile -t nextjs-blog:latest nextjs-blog 
 6. docker run -p 3000:3000 nextjs-blog:latest
+
+Optional Docker Compose
+1. Add docker/docker-compose.yml
+2. cd docker
+3. docker compose up
