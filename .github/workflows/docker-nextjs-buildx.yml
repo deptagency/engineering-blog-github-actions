@@ -55,9 +55,7 @@ jobs:
       -
         name: Set up Docker Buildx
         run: |
-          docker buildx create --name gha --driver=docker-container 
-          docker buildx use gha
-          docker buildx inspect gha --bootstrap
+          docker buildx create --use --driver=docker-container 
 
       -
         name: Build Tag and Push Docker image
@@ -67,6 +65,6 @@ jobs:
             --tag ${{ env.ECR_FULL_REPO }}:latest \
             --tag ${{ env.ECR_FULL_REPO }}:${{ steps.ghameta.outputs.sha_short }} \
             --push \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
+            --cache-to type=gha,mode=max \
+            --cache-from type=gha \
             nextjs-blog
