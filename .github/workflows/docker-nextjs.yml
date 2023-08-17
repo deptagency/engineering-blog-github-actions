@@ -26,6 +26,8 @@ jobs:
   build:
     name: Build and Push Image
     runs-on: ubuntu-latest
+    env:
+      ECR_FULL_REPO: ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}
 
     steps:
       -
@@ -50,7 +52,7 @@ jobs:
         id: dockermeta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ vars.NEXT_BLOG_ECR }}
+          images: ${{ env.ECR_FULL_REPO }}
 
       -
         name: Set up Docker Buildx
