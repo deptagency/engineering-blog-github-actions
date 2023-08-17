@@ -1,0 +1,72 @@
+name: Docker - NextJS buildx cache
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      ## GitHub Actions need '**' to match branches with '/' in their name
+      - '**'
+    paths:
+      - "nextjs-blog/**"
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - 'main'
+
+permissions:
+  id-token: write
+  contents: read
+defaults:
+  run:
+    shell: bash
+
+run-name: ${{ github.workflow }} by @${{ github.actor }} from ${{ github.ref_name }}
+
+jobs:
+  build:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    env:
+      ECR_FULL_REPO: ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}
+
+    steps:
+      -
+        name: Check out code
+        uses: actions/checkout@v3
+
+      -
+        name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      -
+        name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      -
+        name: GHA meta
+        id: ghameta
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      -
+        name: Set up Docker Buildx
+        run: |
+          docker buildx create --name gha --driver=docker-container 
+          docker buildx use gha
+          docker buildx inspect gha --bootstrap
+
+      -
+        name: Build Tag and Push Docker image
+        run: |
+          docker buildx build \
+            --file nextjs-blog/docker/Dockerfile \
+            --tag ${{ env.ECR_FULL_REPO }}:latest \
+            --tag ${{ env.ECR_FULL_REPO }}:${{ steps.ghameta.outputs.sha_short }} \
+            --push \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            nextjs-blog
