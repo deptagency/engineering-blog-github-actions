@@ -62,7 +62,7 @@ jobs:
           driver-opts: image=moby/buildkit:latest
 
       -
-        name: Build and Tag Docker image
+        name: Build Tag and Push Docker image
         uses: docker/build-push-action@v4
         with:
           file: nextjs-blog/docker/Dockerfile
