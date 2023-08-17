@@ -64,18 +64,6 @@ jobs:
           context: nextjs-blog
           tags: ${{ steps.dockermeta.outputs.tags }}
           labels: ${{ steps.dockermeta.outputs.labels }}
-          load: true
-          push: false
+          push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      -
-        name: Push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: nextjs-blog
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:main
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:main" >> $GITHUB_OUTPUT
