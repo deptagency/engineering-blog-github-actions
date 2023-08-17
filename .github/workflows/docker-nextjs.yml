@@ -50,7 +50,7 @@ jobs:
         id: dockermeta
         uses: docker/metadata-action@v4
         with:
-          images: dept/nextjs-blog
+          images: ${{ vars.NEXT_BLOG_ECR }}
 
       -
         name: Set up Docker Buildx
@@ -58,7 +58,7 @@ jobs:
 
       -
         name: Build and Tag Docker image
-        uses: docker/build-push-action@v4.1.1
+        uses: docker/build-push-action@v4
         with:
           file: nextjs-blog/docker/Dockerfile
           context: nextjs-blog
