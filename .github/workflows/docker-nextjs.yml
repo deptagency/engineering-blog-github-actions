@@ -64,7 +64,6 @@ jobs:
           context: nextjs-blog
           tags: ${{ steps.dockermeta.outputs.tags }}
           labels: ${{ steps.dockermeta.outputs.labels }}
-          load: true
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max

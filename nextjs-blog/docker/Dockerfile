@@ -28,8 +28,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # This will do the trick, use the corresponding env file for each environment.
 # COPY .env.production.sample .env.production
-#RUN yarn build
-RUN npx run build
+RUN yarn build
 
 # 3. Production image, copy all the files and run next
 FROM base AS runner
