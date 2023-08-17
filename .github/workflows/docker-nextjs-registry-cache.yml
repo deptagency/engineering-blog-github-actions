@@ -1,4 +1,4 @@
-name: Docker - NextJS GHA cache
+name: Docker - NextJS registry cache
 on:
   workflow_dispatch:
   push:
@@ -65,5 +65,5 @@ jobs:
           tags: ${{ steps.dockermeta.outputs.tags }}
           labels: ${{ steps.dockermeta.outputs.labels }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ vars.NEXT_BLOG_ECR }}-cache
+          cache-to: type=registry,ref=${{ vars.NEXT_BLOG_ECR }}-cache,mode=max
