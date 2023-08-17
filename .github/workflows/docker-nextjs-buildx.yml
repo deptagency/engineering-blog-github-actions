@@ -67,6 +67,6 @@ jobs:
             --tag ${{ env.ECR_FULL_REPO }}:latest \
             --tag ${{ env.ECR_FULL_REPO }}:${{ steps.ghameta.outputs.sha_short }} \
             --push \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
             nextjs-blog
