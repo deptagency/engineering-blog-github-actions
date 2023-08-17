@@ -77,5 +77,5 @@ jobs:
           ECR_REPOSITORY: nextjs-blog
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY" >> $GITHUB_OUTPUT
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:main
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:main" >> $GITHUB_OUTPUT
