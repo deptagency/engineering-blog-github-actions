@@ -1,0 +1,54 @@
+name: Application AWS Terraform Apply
+description: Terraform apply for App AWS infra
+
+inputs:
+  aws-access-key-id:
+    description: >-
+      AWS Access Key ID. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-secret-access-key:
+    description: >-
+      AWS Secret Access Key. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-region:
+    description: 'AWS Region, e.g. us-east-2'
+    required: true
+  terraform-version:
+    description: Terraform version to use
+    required: false
+    default: 1.4.6
+  terraform-directory:
+    description: Directory where Terraform config is located
+    required: false
+    default: '.'
+  envname:
+    description: The Cloud Environment to run
+    required: true
+  github-org:
+    description: GitHub Organization
+    required: true
+  github-token:
+    description: GitHub Token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Application Terraform Plan
+      uses: ./.github/actions/app-tf-plan
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        terraform-version: ${{ inputs.terraform-version }}
+        terraform-directory: ${{ inputs.terraform-directory }}
+        envname: ${{ inputs.envname }}
+        github-org: ${{ inputs.github-org }}
+        github-token: ${{ inputs.github-token }}
+
+    -
+      name: Application Terraform Apply
+      working-directory: ${{ inputs.terraform-directory }}
+      shell: bash
+      run: terraform apply -no-color -auto-approve github-actions.tfplan

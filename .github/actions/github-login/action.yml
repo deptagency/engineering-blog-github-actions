@@ -1,0 +1,17 @@
+name: 'GitHub Login'
+description: 'Gives this job access to private terraform modules.'
+inputs:
+  github-org:
+    description: 'The GitHub org that access is for'
+    required: true
+  github-token:
+    description: 'GitHub token with access to private repos'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup private repo credentials for private modules
+      shell: bash
+      run: |
+        git config --global url.'https://git:${{ inputs.github-token }}@github.com/${{ inputs.github-org }}'.insteadOf 'https://github.com/${{ inputs.github-org }}'
+        git config --global url.'https://${{ inputs.github-token }}:x-oauth-basic@github.com/${{ inputs.github-org }}'.insteadOf ssh://git@github.com/${{ inputs.github-org }}

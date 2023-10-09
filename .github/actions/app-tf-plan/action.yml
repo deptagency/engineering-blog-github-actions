@@ -1,0 +1,64 @@
+name: Application AWS Terraform Plan
+description: Terraform plan for App AWS infra
+
+inputs:
+  aws-access-key-id:
+    description: >-
+      AWS Access Key ID. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-secret-access-key:
+    description: >-
+      AWS Secret Access Key. This input is required if running in the GitHub hosted environment.
+    required: true
+  aws-region:
+    description: 'AWS Region, e.g. us-east-2'
+    required: true
+  terraform-version:
+    description: Terraform version to use
+    required: false
+    default: 1.4.6
+  terraform-directory:
+    description: Directory where Terraform config is located
+    required: false
+    default: '.'
+  envname:
+    description: The Cloud Environment to run
+    required: true
+  github-org:
+    description: GitHub Organization
+    required: true
+  github-token:
+    description: GitHub Token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    -
+      name: AWS Login
+      uses: ./.github/actions/aws-login
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    -
+      name: GitHub Login
+      uses: ./.github/actions/github-login
+      with:
+        github-org: ${{ inputs.github-org }}
+        github-token: ${{ inputs.github-token }}
+
+    -
+      name: Initialize Terraform
+      uses: ./.github/actions/terraform-init
+      with:
+        terraform-version: ${{ inputs.terraform-version }}
+        terraform-directory: ${{ inputs.terraform-directory }}
+
+    - name: Terraform plan
+      uses: ./.github/actions/terraform-plan
+      with:
+        envname: ${{ inputs.envname }}
+        github-token: ${{ inputs.github-token }}
+        terraform-directory: ${{ inputs.terraform-directory }}

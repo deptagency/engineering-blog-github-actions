@@ -1,0 +1,110 @@
+name: Terraform - Plan
+on:
+  push:
+    branches-ignore:
+      - 'main'
+#    paths:
+#      - 'envs/**'
+#      - 'modules/**'
+  workflow_dispatch:
+permissions:
+  id-token: write
+  pull-requests: write
+  contents: read    # This is required for actions/checkout
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash
+env:
+  terraform-version: 1.4.6
+  aws-region: eu-central-1
+  github-org: 'Merit-Circle'
+
+run-name: ${{ github.workflow }} by @${{ github.actor }} from ${{ github.ref_name }}
+
+jobs:
+  testeu-terraform-plan:
+    name: testeu TF Plan
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+
+      -
+        name: Application Terraform Plan
+        uses: ./.github/actions/app-tf-plan
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws-region }}
+          terraform-version: ${{ env.terraform-version }}
+          terraform-directory: "envs/test-eu"
+          envname: "testeu"
+          github-org: ${{ env.github-org }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  acceu-terraform-plan:
+    name: acceu TF Plan
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+
+      -
+        name: Application Terraform Plan
+        uses: ./.github/actions/app-tf-plan
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws-region }}
+          terraform-version: ${{ env.terraform-version }}
+          terraform-directory: "envs/acc-eu"
+          envname: "acceu"
+          github-org: ${{ env.github-org }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  prdeutestnet-terraform-plan:
+    name: prdeutestnet TF Plan
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+
+      -
+        name: Application Terraform Plan
+        uses: ./.github/actions/app-tf-plan
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws-region }}
+          terraform-version: ${{ env.terraform-version }}
+          terraform-directory: "envs/prd-testnet"
+          envname: "prdeutestnet"
+          github-org: ${{ env.github-org }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  prdeu-terraform-plan:
+    name: prdeu TF Plan
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+
+      -
+        name: Application Terraform Plan
+        uses: ./.github/actions/app-tf-plan
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws-region }}
+          terraform-version: ${{ env.terraform-version }}
+          terraform-directory: "envs/prd-eu"
+          envname: "prdeu"
+          github-org: ${{ env.github-org }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

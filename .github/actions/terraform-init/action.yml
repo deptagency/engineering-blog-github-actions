@@ -3,17 +3,6 @@ author: Jirawat Uttayaya (juttayaya)
 description: Initialize and Authorize Terraform
 
 inputs:
-  aws-access-key-id:
-    description: >-
-      AWS Access Key ID. This input is required if running in the GitHub hosted environment.
-    required: true
-  aws-secret-access-key:
-    description: >-
-      AWS Secret Access Key. This input is required if running in the GitHub hosted environment.
-    required: true
-  aws-region:
-    description: 'AWS Region, e.g. us-east-2'
-    required: true
   terraform-version:
     description: Terraform version to use
     required: false
@@ -26,21 +15,13 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
-        aws-region: ${{ inputs.aws-region }}
-    - name: Display AWS auth ID
-      run: aws sts get-caller-identity
-      shell: bash
     - name: Setup Terraform
       # Installs a specific version of Terraform
       # https://github.com/marketplace/actions/hashicorp-setup-terraform
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ inputs.terraform-version }}
+        terraform_wrapper: true
     - name: Configure Terraform plugin cache
       # Using bash $HOME var because ~ is inconsistent in GitHub Actions and Terraform
       # For more info on .terraformrc and plugin_cache_dir
@@ -62,7 +43,7 @@ runs:
       # this step allows the provider plugins step to fail file cache so we can
       # update the providers lock explicitly in the next step
       run: |
-        terraform init -backend-config=./environments/${{ inputs.envname }}/s3.tfbackend
+        terraform init
       shell: bash
       continue-on-error: true
     - name: Terraform init
