@@ -1,0 +1,43 @@
+name: ECS Deploy
+description: Deploy Docker image to ECS
+
+inputs:
+  ecr-full-repo:
+    description: 'ECR repo to push image to'
+    required: true
+  deploy-image-tag:
+    description: 'Docker image tag to deploy'
+    required: true
+  ecs-task-def-json:
+    description: 'Path to ECS task definition JSON file'
+    required: true
+  ecs-container-name:
+    description: 'ECS Container name to update'
+    required: true
+  ecs-cluster-name:
+    description: 'ECS cluster name'
+    required: true
+  ecs-service-name:
+    description: 'ECS service name'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    -
+      name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ inputs.ecs-task-def-json }}
+        container-name: ${{ inputs.ecs-container-name }}
+        image: ${{ inputs.ecr-full-repo }}:${{ inputs.deploy-image-tag }}
+
+    -
+      name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        cluster: ${{ inputs.ecs-cluster-name }}
+        service: ${{ inputs.ecs-service-name }}
+        wait-for-service-stability: true
