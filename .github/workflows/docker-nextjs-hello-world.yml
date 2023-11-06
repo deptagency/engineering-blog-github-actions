@@ -60,7 +60,7 @@ jobs:
           file: nextjs/hello-world-app/docker/Dockerfile
           context:  nextjs/hello-world-app
           # tags: ${{ steps.dockermeta.outputs.tags }}
-          tags: latest
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           labels: ${{ steps.dockermeta.outputs.labels }}
           push: true
 #          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
