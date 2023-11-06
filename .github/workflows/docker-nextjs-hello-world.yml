@@ -1,0 +1,67 @@
+name: Docker - NextJS Hello World
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      ## GitHub Actions need '**' to match branches with '/' in their name
+      - '**'
+    paths:
+      - "nextjs/hello-world-app/**"
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - 'main'
+
+permissions:
+  id-token: write
+  contents: read
+defaults:
+  run:
+    shell: bash
+
+run-name: ${{ github.workflow }} by @${{ github.actor }} from ${{ github.ref_name }}
+
+jobs:
+  build:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REGISTRY: ghcr.io
+      DOCKER_IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      -
+        name: Check out code
+        uses: actions/checkout@v3
+
+      -
+        name: Log in to the Cont    a           iner registry
+        uses: docker/login-action
+      c1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Docker meta
+        id: dockermeta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
+
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      -
+        name: Build Tag and Push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          file: nextjs/hello-world-app/docker/Dockerfile
+          context:  nextjs/hello-world-app
+          tags: ${{ steps.dockermeta.outputs.tags }}
+          labels: ${{ steps.dockermeta.outputs.labels }}
+          push: true
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache,mode=max,image-manifest=true
