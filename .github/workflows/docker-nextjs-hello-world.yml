@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_REGISTRY: ghcr.io
-      DOCKER_IMAGE_NAME: nextjs-hello-world
+      DOCKER_IMAGE_NAME: deptagency/nextjs-hello-world
 
     steps:
       -
