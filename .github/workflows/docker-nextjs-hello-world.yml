@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_REGISTRY: ghcr.io
-      DOCKER_IMAGE_NAME: ${{ github.repository }}
+      DOCKER_IMAGE_NAME: nextjs-hello-world
 
     steps:
       -
@@ -65,5 +65,5 @@ jobs:
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           labels: ${{ steps.dockermeta.outputs.labels }}
           push: true
-#          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
-#          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache,mode=max,image-manifest=true
