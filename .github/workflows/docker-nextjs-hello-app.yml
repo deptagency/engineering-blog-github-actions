@@ -1,4 +1,4 @@
-name: Docker - NextJS Hello World
+name: Docker - NextJS Hello App
 on:
   workflow_dispatch:
   push:
