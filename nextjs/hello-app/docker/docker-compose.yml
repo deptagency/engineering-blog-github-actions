@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  nextjs-blog:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    image: nextjs-blog
+    ports:
+      - '3000:3000'
