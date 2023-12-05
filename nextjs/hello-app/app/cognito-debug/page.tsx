@@ -7,24 +7,34 @@ export default function Page() {
     // Step 1: Get the key id from JWT headers (the kid field)
     const headersList = headers()
     const encodedJwt = headersList.get('x-amzn-oidc-data')
-    const jwtEncodedTokenList = encodedJwt.split('.')
-    const jwtEncodedHeaders = jwtEncodedTokenList[0]
-    const jwtEncodedPayload = jwtEncodedTokenList[1]
-    const jwtEncodedSignature = jwtEncodedTokenList[2]
-    const jwtDecodedHeaders = Buffer.from(jwtEncodedHeaders, 'base64').toString('binary');
-    const jwtDecodedPayload = Buffer.from(jwtEncodedPayload, 'base64').toString('binary');
-    const jwtDecodedSignature = Buffer.from(jwtEncodedSignature, 'base64').toString('binary');
 
-    return (
-        <div>
-            <h1>JWT Headers</h1>
-            <pre>{jwtDecodedHeaders}</pre>
+    if (!encodedJwt) {
+        return (
+            <div>
+                <h1>No HTTP header for x-amzn-oidc-data</h1>
+            </div>
+        )
+    } else {
 
-            <h1>JWT Payload</h1>
-            <pre>{jwtDecodedPayload}</pre>
+        const jwtEncodedTokenList = encodedJwt.split('.')
+        const jwtEncodedHeaders = jwtEncodedTokenList[0]
+        const jwtEncodedPayload = jwtEncodedTokenList[1]
+        const jwtEncodedSignature = jwtEncodedTokenList[2]
+        const jwtDecodedHeaders = Buffer.from(jwtEncodedHeaders, 'base64').toString('binary');
+        const jwtDecodedPayload = Buffer.from(jwtEncodedPayload, 'base64').toString('binary');
+        const jwtDecodedSignature = Buffer.from(jwtEncodedSignature, 'base64').toString('binary');
 
-            <h1>JWT Signature</h1>
-            <pre>{jwtDecodedSignature}</pre>
-        </div>
-    )
+        return (
+            <div>
+                <h1>JWT Headers</h1>
+                <pre>{jwtDecodedHeaders}</pre>
+
+                <h1>JWT Payload</h1>
+                <pre>{jwtDecodedPayload}</pre>
+
+                <h1>JWT Signature</h1>
+                <pre>{jwtDecodedSignature}</pre>
+            </div>
+        )
+    }
 }
