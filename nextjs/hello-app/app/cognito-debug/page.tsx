@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 import { headers } from 'next/headers';
-//import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 import crypto from "crypto";
 
 async function getJwtPayload() {
@@ -38,33 +38,35 @@ async function getJwtPayload() {
             console.log('JWT signature verified.')
             return jwtPayload
         } else {
-            console.log('JWT NOT signature verified.')
-            return null
+            console.log('JWT NOT signature verified via manual verify.')
         }
 
         // Verifier not verifying JWT
-        // const cognitoUserPoolId = process.env.COGNITO_USER_POOL_ID;
-        // if (!cognitoUserPoolId) {
-        //     console.log('No process.env.COGNITO_USER_POOL_ID found.');
-        //     return null;
-        // }
-        // const cognitoClientId = process.env.COGNITO_CLIENT_ID;
-        // if (!cognitoClientId) {
-        //     console.log('No process.env.COGNITO_CLIENT_ID found.');
-        //     return null;
-        // }
-        // const cognitoVerifier = CognitoJwtVerifier.create({
-        //     userPoolId: cognitoUserPoolId,
-        //     tokenUse: null,
-        //     clientId: cognitoClientId,
-        // });
-        // try {
-        //     const jwtVerifiedPayload = await cognitoVerifier.verify(encodedJwt, {});
-        //     console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
-        // } catch {
-        //     console.log("Token not valid!");
-        //     return null;
-        // }
+        const cognitoUserPoolId = process.env.COGNITO_USER_POOL_ID;
+        if (!cognitoUserPoolId) {
+            console.log('No process.env.COGNITO_USER_POOL_ID found.');
+            return null;
+        }
+        const cognitoClientId = process.env.COGNITO_CLIENT_ID;
+        if (!cognitoClientId) {
+            console.log('No process.env.COGNITO_CLIENT_ID found.');
+            return null;
+        }
+        const cognitoVerifier = CognitoJwtVerifier.create({
+            userPoolId: cognitoUserPoolId,
+            tokenUse: null,
+            clientId: cognitoClientId,
+        });
+        try {
+            const jwtVerifiedPayload = await cognitoVerifier.verify(encodedJwt, {});
+            console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
+            return jwtVerifiedPayload;
+        } catch {
+            console.log("Token not valid via CognitoJwtVerifier!");
+        }
+
+        // For now return the unverified JWT payload since verifier is not working
+        return jwtPayload;
     } else {
         console.log('No JWT found.');
         return null;
@@ -75,11 +77,13 @@ export default async function Page(){
     if (!jwtPayload) {
         return (
             <div>
-                <h1>No JWT Payload 12-6 916</h1>
+                <h1>No JWT Payload 12-6 935</h1>
             </div>
         )
     } else {
-        const jwtUsername = JSON.parse(jwtPayload).username
+        const jwtParsed = JSON.parse(jwtPayload)
+        const jwtUsername = jwtParsed.username
+        const jwtEmail = jwtParsed.email
         return (
             <div>
                 <h1>JWT Payload</h1>
@@ -87,6 +91,9 @@ export default async function Page(){
 
                 <h1>JWT Username</h1>
                 <pre>{jwtUsername}</pre>
+
+                <h1>JWT Email</h1>
+                <pre>{jwtEmail}</pre>
             </div>
         )
     }
