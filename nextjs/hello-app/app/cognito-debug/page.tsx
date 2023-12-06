@@ -4,7 +4,6 @@ import { headers } from 'next/headers';
 import crypto from "crypto";
 
 async function getJwtPayload() {
-
     // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-authenticate-users.html
     // https://github.com/awslabs/aws-jwt-verify
 
@@ -76,7 +75,7 @@ export default async function Page(){
     if (!jwtPayload) {
         return (
             <div>
-                <h1>No JWT Payload</h1>
+                <h1>No JWT Payload 12-6 916</h1>
             </div>
         )
     } else {
