@@ -60,7 +60,9 @@ async function getJwtPayload() {
         try {
             const jwtVerifiedPayload = await cognitoVerifier.verify(encodedJwt, {});
             console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
-            return jwtVerifiedPayload;
+            // CognitoJwtPayload not a string
+            // return jwtVerifiedPayload;
+            return jwtPayload;
         } catch {
             console.log("Token not valid via CognitoJwtVerifier!");
         }
