@@ -36,7 +36,8 @@ async function getJwtPayload() {
         const isVerified = verifier.verify(jwtPublicKey, jwtEncodedSignature, 'base64');
         if (isVerified) {
             console.log('JWT signature verified.')
-            return jwtPayload
+            // return jwtPayload
+            return encodedJwt;
         } else {
             console.log('JWT NOT signature verified via manual verify.')
         }
@@ -62,34 +63,55 @@ async function getJwtPayload() {
             console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
             // CognitoJwtPayload not a string
             // return jwtVerifiedPayload;
-            return jwtPayload;
+            // return jwtPayload;
+            return encodedJwt;
         } catch {
             console.log("Token not valid via CognitoJwtVerifier!");
         }
 
         // For now return the unverified JWT payload since verifier is not working
-        return jwtPayload;
+        // return jwtPayload;
+        return encodedJwt;
     } else {
         console.log('No JWT found.');
         return null;
     }
 }
 export default async function Page(){
-    const jwtPayload = await getJwtPayload()
-    if (!jwtPayload) {
+    // Getting the entire JWT payload to show debugging
+    const encodedJwt = await getJwtPayload()
+
+    // const jwtPayload = await getJwtPayload()
+    if (!encodedJwt) {
         return (
             <div>
-                <h1>No JWT Payload 12-6 935</h1>
+                <h1>No JWT Payload and x-amzn-oidc-data HTTP header 12-7 100</h1>
             </div>
         )
     } else {
+        const jwtEncodedTokenList = encodedJwt.split('.');
+        const jwtEncodedHeaders = jwtEncodedTokenList[0];
+        const jwtEncodedPayload = jwtEncodedTokenList[1];
+        const jwtEncodedSignature = jwtEncodedTokenList[2];
+        const jwtDecodedHeaders = Buffer.from(jwtEncodedHeaders, 'base64').toString('binary');
+        const jwtPayload = Buffer.from(jwtEncodedPayload, 'base64').toString('binary');
+
         const jwtParsed = JSON.parse(jwtPayload)
         const jwtUsername = jwtParsed.username
         const jwtEmail = jwtParsed.email
         return (
             <div>
+                <h1>JWT Encoded</h1>
+                <pre>{encodedJwt}</pre>
+
+                <h1>JWT Headers</h1>
+                <pre>{jwtDecodedHeaders}</pre>
+
                 <h1>JWT Payload</h1>
                 <pre>{jwtPayload}</pre>
+
+                <h1>JWT Signature base64</h1>
+                <pre>{jwtEncodedSignature}</pre>
 
                 <h1>JWT Username</h1>
                 <pre>{jwtUsername}</pre>
