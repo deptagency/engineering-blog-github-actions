@@ -11,7 +11,7 @@ async function getJwtPayload() {
     // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-authenticate-users.html
     // https://github.com/awslabs/aws-jwt-verify
 
-    // Step 1: Get the key id from JWT headers (the kid field)
+    // https://github.com/awslabs/aws-jwt-verify/issues/71
     const headersList = headers();
     const encodedJwt = headersList.get('x-amzn-oidc-data');
     console.log(`encodedJwt = ${encodedJwt}`);
