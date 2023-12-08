@@ -67,3 +67,11 @@ jobs:
           push: true
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache,mode=max,image-manifest=true
+          
+      -
+        name: Deploy to Amazon ECS
+        run: |
+          echo "Deploying to cluster"
+          aws ecs update-service --cluster jirawat-cognito-demo --service nextjs-hw-srv-03 --force-new-deployment --task-definition nextjs-hello-world --region us-east-1
+          aws ecs wait services-stable --cluster jirawat-cognito-demo --service nextjs-hw-srv-03  --region us-east-1
+        shell: bash
