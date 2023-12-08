@@ -2,8 +2,14 @@ import { Buffer } from "buffer";
 import { headers } from 'next/headers';
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import crypto from "crypto";
+import * as jwt from "jsonwebtoken";
+import base64Url from "base64url";
+
+const jws = require("jws");
+const fetch = require("node-fetch").default;
 
 async function getJwtPayload() {
+
     // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-authenticate-users.html
     // https://github.com/awslabs/aws-jwt-verify
 
@@ -13,66 +19,106 @@ async function getJwtPayload() {
     console.log(`encodedJwt = ${encodedJwt}`);
     if (encodedJwt) {
         const awsRegion = 'us-east-1';
-        const jwtEncodedTokenList = encodedJwt.split('.');
-        const jwtEncodedHeaders = jwtEncodedTokenList[0];
-        const jwtEncodedPayload = jwtEncodedTokenList[1];
-        const jwtEncodedSignature = jwtEncodedTokenList[2];
-        const jwtDecodedHeaders = Buffer.from(jwtEncodedHeaders, 'base64').toString('binary');
-        const jwtPayload = Buffer.from(jwtEncodedPayload, 'base64').toString('binary');
-        console.log(`jwtDecodedHeaders = ${jwtDecodedHeaders}`);
-        console.log(`jwtPayload = ${jwtPayload}`);
 
-        // Step 2: Get the public key from regional endpoint
-        const jwtKid = JSON.parse(jwtDecodedHeaders).kid;
-        console.log(`jwtKid = ${jwtKid}`);
-        const jwtPublicKeyUrl = `https://public-keys.auth.elb.${awsRegion}.amazonaws.com/${jwtKid}`;
-        const jwtPublicKeyResponse = await fetch(jwtPublicKeyUrl, { method: 'GET' , cache: "no-store"});
-        const jwtPublicKey = await jwtPublicKeyResponse.text();
-        console.log(`jwtPublicKey = ${jwtPublicKey}`);
-
-        // Step 3: Verify the signature of the JWT using the public key
-        const verifier = crypto.createVerify('RSA-SHA256');
-        verifier.update(`${jwtEncodedHeaders}.${jwtEncodedPayload}`);
-        const isVerified = verifier.verify(jwtPublicKey, jwtEncodedSignature, 'base64');
-        if (isVerified) {
-            console.log('JWT signature verified.')
-            // return jwtPayload
-            return encodedJwt;
-        } else {
-            console.log('JWT NOT signature verified via manual verify.')
-        }
-
-        // Verifier not verifying JWT
-        const cognitoUserPoolId = process.env.COGNITO_USER_POOL_ID;
-        if (!cognitoUserPoolId) {
-            console.log('No process.env.COGNITO_USER_POOL_ID found.');
+        var base64UrlToken = base64Url.fromBase64(encodedJwt);
+        const decoded = jwt.decode(base64UrlToken, { complete: true });
+    
+        if (!decoded) {
+            console.log('jwt could not be decoded')
             return null;
         }
-        const cognitoClientId = process.env.COGNITO_CLIENT_ID;
-        if (!cognitoClientId) {
-            console.log('No process.env.COGNITO_CLIENT_ID found.');
-            return null;
-        }
-        const cognitoVerifier = CognitoJwtVerifier.create({
-            userPoolId: cognitoUserPoolId,
-            tokenUse: null,
-            clientId: cognitoClientId,
-        });
+    
+        const { kid } = decoded.header;
+    
+        const uri = `https://public-keys.auth.elb.${awsRegion}.amazonaws.com/${kid}`;
+    
+        console.log(`Fetching key at: ${uri}`);
+    
+        const response = await fetch(uri);
+        const key = await response.text();
+    
+        console.log(key);
+    
         try {
-            const jwtVerifiedPayload = await cognitoVerifier.verify(encodedJwt, {});
-            console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
-            // CognitoJwtPayload not a string
-            // return jwtVerifiedPayload;
-            // return jwtPayload;
-            return encodedJwt;
-        } catch (e) {
-            console.log("Token not valid via CognitoJwtVerifier!");
-            console.log(e)
+            const verify = jws.verify(encodedJwt, "ES256", key);
+            if (!verify) {
+                console.log('JWT signature not verified.')
+
+                return null;
+            }
+
+            console.log('JWT signature verified.')
+    
+            return encodedJwt
+        } catch (err) {
+            console.log('JWT signature not verified due to error.')
+            console.error(err);
+            throw err;
         }
+
+
+        // // Old
+        // const awsRegion = 'us-east-1';
+        // const jwtEncodedTokenList = encodedJwt.split('.');
+        // const jwtEncodedHeaders = jwtEncodedTokenList[0];
+        // const jwtEncodedPayload = jwtEncodedTokenList[1];
+        // const jwtEncodedSignature = jwtEncodedTokenList[2];
+        // const jwtDecodedHeaders = Buffer.from(jwtEncodedHeaders, 'base64').toString('binary');
+        // const jwtPayload = Buffer.from(jwtEncodedPayload, 'base64').toString('binary');
+        // console.log(`jwtDecodedHeaders = ${jwtDecodedHeaders}`);
+        // console.log(`jwtPayload = ${jwtPayload}`);
+
+        // // Step 2: Get the public key from regional endpoint
+        // const jwtKid = JSON.parse(jwtDecodedHeaders).kid;
+        // console.log(`jwtKid = ${jwtKid}`);
+        // const jwtPublicKeyUrl = `https://public-keys.auth.elb.${awsRegion}.amazonaws.com/${jwtKid}`;
+        // const jwtPublicKeyResponse = await fetch(jwtPublicKeyUrl, { method: 'GET' , cache: "no-store"});
+        // const jwtPublicKey = await jwtPublicKeyResponse.text();
+        // console.log(`jwtPublicKey = ${jwtPublicKey}`);
+
+        // // Step 3: Verify the signature of the JWT using the public key
+        // const verifier = crypto.createVerify('RSA-SHA256');
+        // verifier.update(`${jwtEncodedHeaders}.${jwtEncodedPayload}`);
+        // const isVerified = verifier.verify(jwtPublicKey, jwtEncodedSignature, 'base64');
+        // if (isVerified) {
+        //     console.log('JWT signature verified.')
+        //     // return jwtPayload
+        //     return encodedJwt;
+        // } else {
+        //     console.log('JWT NOT signature verified via manual verify.')
+        // }
+
+        // // Verifier not verifying JWT
+        // const cognitoUserPoolId = process.env.COGNITO_USER_POOL_ID;
+        // if (!cognitoUserPoolId) {
+        //     console.log('No process.env.COGNITO_USER_POOL_ID found.');
+        //     return null;
+        // }
+        // const cognitoClientId = process.env.COGNITO_CLIENT_ID;
+        // if (!cognitoClientId) {
+        //     console.log('No process.env.COGNITO_CLIENT_ID found.');
+        //     return null;
+        // }
+        // const cognitoVerifier = CognitoJwtVerifier.create({
+        //     userPoolId: cognitoUserPoolId,
+        //     tokenUse: null,
+        //     clientId: cognitoClientId,
+        // });
+        // try {
+        //     const jwtVerifiedPayload = await cognitoVerifier.verify(encodedJwt, {});
+        //     console.log(`Token is valid. Verified Payload: ${jwtVerifiedPayload}`);
+        //     // CognitoJwtPayload not a string
+        //     // return jwtVerifiedPayload;
+        //     // return jwtPayload;
+        //     return encodedJwt;
+        // } catch (e) {
+        //     console.log("Token not valid via CognitoJwtVerifier!");
+        //     console.log(e)
+        // }
 
         // For now return the unverified JWT payload since verifier is not working
         // return jwtPayload;
-        return encodedJwt;
+        // return encodedJwt;
     } else {
         console.log('No JWT found.');
         return null;
