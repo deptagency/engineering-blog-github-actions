@@ -4,9 +4,7 @@ import { CognitoJwtVerifier } from "aws-jwt-verify";
 import crypto from "crypto";
 import * as jwt from "jsonwebtoken";
 import base64Url from "base64url";
-
-const jws = require("jws");
-const fetch = require("node-fetch").default;
+import jws from "jws";
 
 async function getJwtPayload() {
 
