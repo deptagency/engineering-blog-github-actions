@@ -101,6 +101,9 @@ export default async function Page(){
         const jwtEmail = jwtParsed.email
         return (
             <div>
+                <h1>Process Env</h1>
+                {JSON.stringify(process.env, null, 2)}
+
                 <h1>JWT Encoded</h1>
                 <pre>{encodedJwt}</pre>
 
