@@ -65,8 +65,9 @@ async function getJwtPayload() {
             // return jwtVerifiedPayload;
             // return jwtPayload;
             return encodedJwt;
-        } catch {
+        } catch (e) {
             console.log("Token not valid via CognitoJwtVerifier!");
+            console.log(e)
         }
 
         // For now return the unverified JWT payload since verifier is not working
