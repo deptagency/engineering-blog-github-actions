@@ -33,4 +33,4 @@ jobs:
       -
         name: Print type_a
         run: |
-          echo "type_a key:${{ matrix.type_a }}"
+          echo "type_a key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
