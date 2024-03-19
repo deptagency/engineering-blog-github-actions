@@ -16,8 +16,7 @@ jobs:
         name: Step One
         run: |
           if [[ "${{ matrix.type_a }}" == "type_a_01" ]]; then
-            echo "FAIL Step One: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
-            exit 1
+            core.setFailed("FAIL Step One: key:${{ matrix.type_a }}")
           else
             echo "Step One: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
           fi
@@ -41,8 +40,7 @@ jobs:
         name: Step One
         run: |
           if [[ "${{ matrix.type_b }}" == "type_b_01" ]]; then
-            echo "FAIL Step One: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
-            exit 1
+            core.setFailed("FAIL Step One: key:${{ matrix.type_b }}")
           else
             echo "Step One: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
           fi
@@ -66,8 +64,7 @@ jobs:
         name: Step One
         run: |
           if [[ "${{ matrix.type_c }}" == "type_c_01" ]]; then
-            echo "FAIL Step One: key:${{ matrix.type_c }}" >> $GITHUB_STEP_SUMMARY
-            exit 1
+            core.setFailed("FAIL Step One: key:${{ matrix.type_c }}")
           else
             echo "Step One: key:${{ matrix.type_c }}" >> $GITHUB_STEP_SUMMARY
           fi
