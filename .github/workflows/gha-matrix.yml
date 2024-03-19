@@ -23,11 +23,16 @@ jobs:
 
     steps:
       -
-        name: Print type_b
+        name: Step One
         run: |
           if [[ "${{ matrix.type_b }}" == "type_b_01" ]]; then
-            echo "FAIL: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+            echo "FAIL Step One: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "Summary: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+            echo "Step One: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
           fi
+
+      -
+        name: Step Two
+        run: |
+          echo "Step Two: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
