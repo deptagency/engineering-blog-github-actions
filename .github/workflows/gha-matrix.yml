@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  fft_coet:
+  fail-fast-true-continue-on-error-true:
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
@@ -28,7 +28,7 @@ jobs:
           sleep 60
           echo "Step Two: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
 
-  all_fail:
+  fail-fast-true-continue-on-error-false:
     runs-on: ubuntu-latest
     continue-on-error: false
     strategy:
@@ -52,3 +52,53 @@ jobs:
         run: |
           sleep 60
           echo "Step Two: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+
+  fail-fast-false-continue-on-error-true:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        type_c: [type_c_00, type_c_01, type_c_02]
+
+    steps:
+      -
+        name: Step One
+        run: |
+          if [[ "${{ matrix.type_c }}" == "type_c_01" ]]; then
+            echo "FAIL Step One: key:${{ matrix.type_c }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "Step One: key:${{ matrix.type_c }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      -
+        name: Step Two
+        run: |
+          sleep 60
+          echo "Step Two: key:${{ matrix.type_c }}" >> $GITHUB_STEP_SUMMARY
+
+  fail-fast-false-continue-on-error-false:
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        type_d: [type_d_00, type_d_01, type_d_02]
+
+    steps:
+      -
+        name: Step One
+        run: |
+          if [[ "${{ matrix.type_d }}" == "type_d_01" ]]; then
+            echo "FAIL Step One: key:${{ matrix.type_d }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "Step One: key:${{ matrix.type_d }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      -
+        name: Step Two
+        run: |
+          sleep 60
+          echo "Step Two: key:${{ matrix.type_d }}" >> $GITHUB_STEP_SUMMARY
