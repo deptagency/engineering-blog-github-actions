@@ -27,6 +27,7 @@ jobs:
         run: |
           if [[ "${{ matrix.type_b }}" == "type_b_01" ]]; then
             echo "FAIL: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
           else
             echo "Summary: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
           fi
