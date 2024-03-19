@@ -28,6 +28,32 @@ jobs:
           sleep 60
           echo "Step Two: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
 
+  fail-fast-true-continue-on-error-true_two:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: true
+      matrix:
+        type_aa: [type_aa_00, type_aa_01, type_aa_02]
+
+    steps:
+      -
+        name: Step One
+        continue-on-error: true
+        run: |
+          if [[ "${{ matrix.type_aa }}" == "type_aa_01" ]]; then
+            echo "FAIL Step One: key:${{ matrix.type_aa }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "Step One: key:${{ matrix.type_aa }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      -
+        name: Step Two
+        run: |
+          sleep 60
+          echo "Step Two: key:${{ matrix.type_aa }}" >> $GITHUB_STEP_SUMMARY
+
   fail-fast-true-continue-on-error-false:
     runs-on: ubuntu-latest
     continue-on-error: false
