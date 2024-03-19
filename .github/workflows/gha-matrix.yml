@@ -17,13 +17,13 @@ jobs:
       -
         name: Print type_x
         run: |
-          echo "type_x key:${{ matrix.type_x }}"
+          echo "type_x key:${{ matrix.type_x }}" >> $GITHUB_STEP_SUMMARY
 
   test_matrix_b:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        type_a: [type_a_00, type_a_01, type_a_02]
+        type_b: [type_b_00, type_b_01, type_b_02]
 
     steps:
       -
@@ -31,6 +31,6 @@ jobs:
         uses: actions/checkout@v4
 
       -
-        name: Print type_a
+        name: Print type_b
         run: |
-          echo "type_a key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
+          echo "type_b key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
