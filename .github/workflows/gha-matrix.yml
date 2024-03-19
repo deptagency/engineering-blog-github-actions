@@ -3,22 +3,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_matrix_a:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        type_a: [type_a_00, type_a_01, type_a_02]
-
-    steps:
-      -
-        name: Print type_x
-        run: |
-          echo "Summary: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
-
   test_matrix_b:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      # fail-fast: true
       matrix:
         type_b: [type_b_00, type_b_01, type_b_02]
 
@@ -36,4 +24,5 @@ jobs:
       -
         name: Step Two
         run: |
+          sleep 60
           echo "Step Two: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
