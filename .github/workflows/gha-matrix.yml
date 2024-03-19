@@ -13,7 +13,7 @@ jobs:
       -
         name: Print type_x
         run: |
-          echo "Summary: type_a key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
+          echo "Summary: key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
 
   test_matrix_b:
     runs-on: ubuntu-latest
@@ -25,4 +25,8 @@ jobs:
       -
         name: Print type_b
         run: |
-          echo "Summary: type_b key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ matrix.type_b }}" == "type_b_01" ]]; then
+            echo "FAIL: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Summary: key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+          fi
