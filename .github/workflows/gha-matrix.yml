@@ -7,13 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        type_x: [type_x_00, type_x_01, type_x_02]
+        type_a: [type_a_00, type_a_01, type_a_02]
 
     steps:
       -
         name: Print type_x
         run: |
-          echo "type_x key:${{ matrix.type_x }}" >> $GITHUB_STEP_SUMMARY
+          echo "Output: type_a key:${{ matrix.type_a }}" >> $GITHUB_OUTPUT
+          echo "Summary: type_a key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
 
   test_matrix_b:
     runs-on: ubuntu-latest
@@ -25,4 +26,5 @@ jobs:
       -
         name: Print type_b
         run: |
-          echo "type_b key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
+          echo "Output: type_b key:${{ matrix.type_b }}" >> $GITHUB_OUTPUT
+          echo "Summary: type_b key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
