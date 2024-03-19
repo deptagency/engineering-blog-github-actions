@@ -18,6 +18,7 @@ jobs:
   test_matrix_b:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: true
       matrix:
         type_b: [type_b_00, type_b_01, type_b_02]
 
