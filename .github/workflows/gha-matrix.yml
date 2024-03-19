@@ -11,10 +11,6 @@ jobs:
 
     steps:
       -
-        name: Checkout
-        uses: actions/checkout@v4
-
-      -
         name: Print type_x
         run: |
           echo "type_x key:${{ matrix.type_x }}" >> $GITHUB_STEP_SUMMARY
@@ -26,10 +22,6 @@ jobs:
         type_b: [type_b_00, type_b_01, type_b_02]
 
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-
       -
         name: Print type_b
         run: |
