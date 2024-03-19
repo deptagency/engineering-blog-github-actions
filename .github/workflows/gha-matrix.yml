@@ -13,7 +13,6 @@ jobs:
       -
         name: Print type_x
         run: |
-          echo "Output: type_a key:${{ matrix.type_a }}" >> $GITHUB_OUTPUT
           echo "Summary: type_a key:${{ matrix.type_a }}" >> $GITHUB_STEP_SUMMARY
 
   test_matrix_b:
@@ -26,5 +25,4 @@ jobs:
       -
         name: Print type_b
         run: |
-          echo "Output: type_b key:${{ matrix.type_b }}" >> $GITHUB_OUTPUT
           echo "Summary: type_b key:${{ matrix.type_b }}" >> $GITHUB_STEP_SUMMARY
