@@ -1,4 +1,4 @@
-name: Docker - NextJS AWS ECS registry cache
+name: Docker - NextJS AWS ECR registry cache
 on:
   workflow_dispatch:
   push:
