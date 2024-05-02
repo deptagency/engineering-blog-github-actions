@@ -1,4 +1,4 @@
-name: Docker - NextJS AWS ECS registry cache
+name: Docker - NextJS GHCR registry cache
 on:
   workflow_dispatch:
   push:
@@ -16,6 +16,8 @@ on:
 permissions:
   id-token: write
   contents: read
+  packages: write
+
 defaults:
   run:
     shell: bash
@@ -27,7 +29,8 @@ jobs:
     name: Build and Push Image
     runs-on: ubuntu-latest
     env:
-      ECR_FULL_REPO: ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}
+      DOCKER_REGISTRY: ghcr.io
+      DOCKER_IMAGE_NAME: deptagency/nextjs-hello-app
 
     steps:
       -
@@ -35,24 +38,19 @@ jobs:
         uses: actions/checkout@v3
 
       -
-        name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        name: Log in to the Container registry
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      -
-        name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       -
         name: Docker meta
         id: dockermeta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.ECR_FULL_REPO }}
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
 
       -
         name: Set up Docker Buildx
@@ -71,5 +69,5 @@ jobs:
           labels: ${{ steps.dockermeta.outputs.labels }}
           pull: true
           push: true
-          cache-from: type=registry,ref=${{ env.ECR_FULL_REPO }}:dockercache
-          cache-to: type=registry,ref=${{ env.ECR_FULL_REPO }}:dockercache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:dockercache,mode=max,image-manifest=true
